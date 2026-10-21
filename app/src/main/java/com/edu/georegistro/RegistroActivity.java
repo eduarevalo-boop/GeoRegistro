@@ -15,7 +15,12 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import java.util.HashMap;
+import java.util.Map;
 
 public class RegistroActivity extends AppCompatActivity {
 
@@ -24,6 +29,7 @@ public class RegistroActivity extends AppCompatActivity {
     private Button botonGPS, botonGuardar;
 
     private FusedLocationProviderClient clienteUbicacion;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,6 +51,7 @@ public class RegistroActivity extends AppCompatActivity {
         listaCategorias.setAdapter(adaptador);
 
         clienteUbicacion = LocationServices.getFusedLocationProviderClient(this);
+        db = FirebaseFirestore.getInstance();
 
         botonGPS.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -104,6 +111,29 @@ public class RegistroActivity extends AppCompatActivity {
             return;
         }
 
-        Toast.makeText(this, "Datos validados. Listo para enviar a Firebase.", Toast.LENGTH_SHORT).show();
+        Map<String, Object> incidencia = new HashMap<>();
+        incidencia.put("titulo", txtTitulo);
+        incidencia.put("detalle", txtDetalle);
+        incidencia.put("categoria", listaCategorias.getSelectedItem().toString());
+        incidencia.put("fecha", txtFecha);
+        incidencia.put("latitud", cajaLatitud.getText().toString());
+        incidencia.put("longitud", cajaLongitud.getText().toString());
+
+        db.collection("incidencias")
+                .add(incidencia)
+                .addOnSuccessListener(new OnSuccessListener<DocumentReference>() {
+                    @Override
+                    public void onSuccess(DocumentReference documentReference) {
+                        Toast.makeText(RegistroActivity.this, "¡Incidencia guardada en la nube!", Toast.LENGTH_LONG).show();
+                        cajaTitulo.setText("");
+                        cajaDetalle.setText("");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        Toast.makeText(RegistroActivity.this, "Error de red: " + e.getMessage(), Toast.LENGTH_LONG).show();
+                    }
+                });
     }
 }
