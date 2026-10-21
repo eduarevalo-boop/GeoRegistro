@@ -1,24 +1,39 @@
 package com.edu.georegistro;
 
 import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
 
-public class MapaActivity extends AppCompatActivity {
+public class MapaActivity extends AppCompatActivity implements OnMapReadyCallback {
+
+    private GoogleMap mapaGoogle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        EdgeToEdge.enable(this);
         setContentView(R.layout.activity_mapa);
-        ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main), (v, insets) -> {
-            Insets systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars());
-            v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
-            return insets;
-        });
+
+        SupportMapFragment fragmentoMapa = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.mapaIncidencias);
+
+        if (fragmentoMapa != null) {
+            fragmentoMapa.getMapAsync(this);
+        }
+    }
+
+    @Override
+    public void onMapReady(@NonNull GoogleMap googleMap) {
+        mapaGoogle = googleMap;
+
+        LatLng centroChillan = new LatLng(-36.589674, -72.082504);
+        mapaGoogle.addMarker(new MarkerOptions().position(centroChillan).title("Centro de Operaciones"));
+
+        mapaGoogle.moveCamera(CameraUpdateFactory.newLatLngZoom(centroChillan, 14f));
     }
 }
