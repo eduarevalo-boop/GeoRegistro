@@ -1,5 +1,8 @@
 package com.edu.georegistro;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -7,13 +10,20 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import com.google.android.gms.location.FusedLocationProviderClient;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnSuccessListener;
 
 public class RegistroActivity extends AppCompatActivity {
 
     private EditText cajaTitulo, cajaDetalle, cajaFecha, cajaLatitud, cajaLongitud;
     private Spinner listaCategorias;
     private Button botonGPS, botonGuardar;
+
+    private FusedLocationProviderClient clienteUbicacion;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,10 +44,12 @@ public class RegistroActivity extends AppCompatActivity {
         adaptador.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         listaCategorias.setAdapter(adaptador);
 
+        clienteUbicacion = LocationServices.getFusedLocationProviderClient(this);
+
         botonGPS.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(RegistroActivity.this, "AQUIIII VA UN TEXTOOOO, PENDIENTEE", Toast.LENGTH_SHORT).show();
+                obtenerCoordenadas();
             }
         });
 
@@ -45,6 +57,26 @@ public class RegistroActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 ejecutarValidaciones();
+            }
+        });
+    }
+
+    private void obtenerCoordenadas() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 100);
+            return;
+        }
+
+        clienteUbicacion.getLastLocation().addOnSuccessListener(this, new OnSuccessListener<Location>() {
+            @Override
+            public void onSuccess(Location location) {
+                if (location != null) {
+                    cajaLatitud.setText(String.valueOf(location.getLatitude()));
+                    cajaLongitud.setText(String.valueOf(location.getLongitude()));
+                    Toast.makeText(RegistroActivity.this, "Ubicación obtenida", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(RegistroActivity.this, "Error al obtener ubicación", Toast.LENGTH_SHORT).show();
+                }
             }
         });
     }
