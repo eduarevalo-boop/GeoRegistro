@@ -10,6 +10,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private Button btnRegistrar;
     private Button btnMapa;
+    private Button btnSensor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -19,8 +20,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         btnRegistrar = findViewById(R.id.botonNuevaIncidencia);
         btnMapa = findViewById(R.id.botonVerUbicaciones);
 
+        btnSensor = findViewById(R.id.botonVerSensor);
+
         btnRegistrar.setOnClickListener(this);
         btnMapa.setOnClickListener(this);
+
+        if (btnSensor != null) {
+            btnSensor.setOnClickListener(this);
+        }
     }
 
     @Override
@@ -33,6 +40,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } else if (id == R.id.botonVerUbicaciones) {
             Intent intentMapa = new Intent(this, MapaActivity.class);
             startActivity(intentMapa);
+        } else if (id == R.id.botonVerSensor) {
+            Intent intentSensor = new Intent(this, SensorActivity.class);
+            startActivity(intentSensor);
         }
     }
 }
